@@ -7,14 +7,20 @@ datasource db {
 }
 
 model User {
-  id           Int      @id @default(autoincrement())
-  username     String   @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  role         String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id                 Int                 @id @default(autoincrement())
+  username           String              @unique
+  passwordHash       String
+  firstName          String
+  lastName           String
+  role               String
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  bookings           Booking[]
+  creditTransactions CreditTransaction[] @relation("CreditTransactionUser")
+  adminCreditActions CreditTransaction[] @relation("CreditTransactionAdmin")
+
+  @@index([role])
+  @@index([lastName, firstName])
 }
 
 model Room {
@@ -25,7 +31,10 @@ model Room {
   pricePerHour Int
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
-  roomOptions  RoomOption[]
+  options      RoomOption[]
+  bookings     Booking[]
+
+  @@index([capacity])
 }
 
 model ServiceOption {
@@ -43,4 +52,54 @@ model RoomOption {
   enabled         Boolean       @default(true)
   room            Room          @relation(fields: [roomId], references: [id])
   serviceOption   ServiceOption @relation(fields: [serviceOptionId], references: [id])
+
+  @@unique([roomId, serviceOptionId])
+  @@index([roomId])
+  @@index([serviceOptionId])
+}
+
+model Booking {
+  id               Int             @id @default(autoincrement())
+  userId           Int
+  roomId           Int
+  bookingDate      DateTime
+  startHour        Int
+  endHour          Int
+  roomNameSnapshot String
+  roomPricePerHour Int
+  roomBasePrice    Int
+  totalPrice       Int
+  createdAt        DateTime        @default(now())
+  user             User            @relation(fields: [userId], references: [id])
+  room             Room            @relation(fields: [roomId], references: [id])
+  selectedOptions  BookingOption[]
+
+  @@index([userId])
+  @@index([roomId, bookingDate])
+  @@index([createdAt])
+}
+
+model BookingOption {
+  id        Int     @id @default(autoincrement())
+  bookingId Int
+  name      String
+  price     Int
+  booking   Booking @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
+}
+
+model CreditTransaction {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  adminId   Int
+  amount    Int
+  reason    String
+  createdAt DateTime @default(now())
+  user      User     @relation("CreditTransactionUser", fields: [userId], references: [id])
+  admin     User     @relation("CreditTransactionAdmin", fields: [adminId], references: [id])
+
+  @@index([userId])
+  @@index([adminId])
+  @@index([createdAt])
 }
