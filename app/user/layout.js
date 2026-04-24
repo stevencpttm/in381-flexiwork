@@ -2,18 +2,18 @@ import Link from 'next/link';
 import { requireRole } from '@/lib/auth';
 import { logoutAction } from '@/app/logout/actions';
 
-export default async function AdminLayout({ children }) {
-  const session = await requireRole('ADMIN');
+export default async function UserLayout({ children }) {
+  const session = await requireRole('USER');
 
   return (
     <div>
       <header className="bg-slate-800 p-2 flex text-white justify-between">
-        <span className="font-bold flex-1">Admin Area</span>
+        <span className="font-bold flex-1">User Area</span>
 
         <nav className="flex space-x-4 justify-center items-center flex-1">
-          <Link href="/admin">Home</Link>
-          <Link href="/admin/users">Users</Link>
-          <Link href="/admin/rooms">Rooms</Link>
+          <Link href="/user">Home</Link>
+          <Link href="/user/search">Search</Link>
+          <Link href="/user/profile">Profile</Link>
         </nav>
 
         <div className="flex space-x-2 items-center flex-1 justify-end">
